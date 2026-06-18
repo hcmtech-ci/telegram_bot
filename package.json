@@ -1,14 +1,14 @@
 {
-  "name": "telegram-vps-bot",
+  "name": "vpn-sales-bot",
   "version": "1.0.0",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.43.4",
-    "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "pg": "^8.11.5",
     "telegraf": "^4.16.3"
   }
 }
