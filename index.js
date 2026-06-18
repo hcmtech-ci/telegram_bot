@@ -75,6 +75,7 @@ bot.on('text', async (ctx, next) => {
     renewStatus = 'RENEW';
   }
 
+  // ရက်စွဲသတ်မှတ်ချက် (မြန်မာစံတော်ချိန်)
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { timeZone: 'Asia/Yangon' }); 
 
@@ -99,6 +100,7 @@ bot.on('text', async (ctx, next) => {
   }
 });
 
+// စိတ်ချရအောင် ပုံသေနည်း ပြန်ပြင်ထားသော Report Generator
 async function generateReport(filterType) {
   const sheet = doc.sheetsByIndex[0];
   const rows = await sheet.getRows();
@@ -121,11 +123,15 @@ async function generateReport(filterType) {
 
     let isMatch = false;
     
-    if (filterType === 'today' && rDate === todayStr) {
-      isMatch = true;
-    } else if (filterType === 'month' && rDate) {
-      const parts = rDate.split('/');
-      if (parseInt(parts[0]) === currentMonth && parseInt(parts[2]) === currentYear) isMatch = true;
+    if (filterType === 'today') {
+      if (rDate === todayStr) isMatch = true;
+    } else if (filterType === 'month') {
+      if (rDate && rDate.includes('/')) {
+        const parts = rDate.split('/');
+        const rowMonth = parseInt(parts[0]);
+        const rowYear = parseInt(parts[2]);
+        if (rowMonth === currentMonth && rowYear === currentYear) isMatch = true;
+      }
     } else if (filterType === 'all') {
       isMatch = true;
     }
@@ -134,9 +140,13 @@ async function generateReport(filterType) {
       totalSales++;
       totalRevenue += rMoney;
       
-      if (adminRevenue[rSeller] !== undefined) adminRevenue[rSeller] += rMoney;
+      if (adminRevenue[rSeller] !== undefined) {
+        adminRevenue[rSeller] += rMoney;
+      } else {
+        adminRevenue[rSeller] = rMoney;
+      }
       
-      if (rType.toLowerCase().includes('vps') || rType.toLowerCase().includes('outline')) {
+      if (rType.toLowerCase().includes('vps') || rType.toLowerCase().includes('outline') || rType.toLowerCase().includes('3x')) {
         serviceCount['VPS']++;
       } else {
         serviceCount['VPN Keys']++;
@@ -155,11 +165,11 @@ bot.hears('📊 Today Report', async (ctx) => {
     msg += `✨ ရောင်းရဦးရေ: ${rep.totalSales} ယောက်\n`;
     msg += `💰 စုစုပေါင်းဝင်ငွေ: ${rep.totalRevenue} MMK\n\n`;
     msg += `🧑‍💻 ADMIN SALES SUMMARY\n`;
-    msg += ` ┣━ Owner-HCM: ${rep.adminRevenue['Owner-HCM']} MMK\n`;
-    msg += ` ┗━ Admin-CM: ${rep.adminRevenue['Admin-CM']} MMK\n\n`;
+    msg += ` ┣━ Owner-HCM: ${rep.adminRevenue['Owner-HCM'] || 0} MMK\n`;
+    msg += ` ┗━ Admin-CM: ${rep.adminRevenue['Admin-CM'] || 0} MMK\n\n`;
     msg += `📦 SERVICE SUMMARY\n`;
-    msg += ` ┣━ 🌐 VPN Keys: ${rep.serviceCount['VPN Keys']} ခု\n`;
-    msg += ` ┗━ 🖥 VPS (Outline/3X): ${rep.serviceCount['VPS']} လုံး`;
+    msg += ` ┣━ 🌐 VPN Keys: ${rep.serviceCount['VPN Keys'] || 0} ခု\n`;
+    msg += ` ┗━ 🖥 VPS (Outline/3X): ${rep.serviceCount['VPS'] || 0} လုံး`;
     
     return ctx.reply(msg);
   } catch (err) {
@@ -176,11 +186,11 @@ bot.hears('📅 Monthly Report', async (ctx) => {
     msg += `✨ ယခုလရောင်းရဦးရေ: ${rep.totalSales} ယောက်\n`;
     msg += `💰 ယခုလဝင်ငွေ: ${rep.totalRevenue} MMK\n\n`;
     msg += `🧑‍💻 ADMIN SALES SUMMARY\n`;
-    msg += ` ┣━ Owner-HCM: ${rep.adminRevenue['Owner-HCM']} MMK\n`;
-    msg += ` ┗━ Admin-CM: ${rep.adminRevenue['Admin-CM']} MMK\n\n`;
+    msg += ` ┣━ Owner-HCM: ${rep.adminRevenue['Owner-HCM'] || 0} MMK\n`;
+    msg += ` ┗━ Admin-CM: ${rep.adminRevenue['Admin-CM'] || 0} MMK\n\n`;
     msg += `📦 SERVICE SUMMARY\n`;
-    msg += ` ┣━ 🌐 VPN Keys: ${rep.serviceCount['VPN Keys']} ခု\n`;
-    msg += ` ┗━ 🖥 VPS (Outline/3X): ${rep.serviceCount['VPS']} လုံး`;
+    msg += ` ┣━ 🌐 VPN Keys: ${rep.serviceCount['VPN Keys'] || 0} ခု\n`;
+    msg += ` ┗━ 🖥 VPS (Outline/3X): ${rep.serviceCount['VPS'] || 0} လုံး`;
     
     return ctx.reply(msg);
   } catch (err) {
@@ -197,11 +207,11 @@ bot.hears('📈 All Time Report', async (ctx) => {
     msg += `✨ စုစုပေါင်း User: ${rep.totalSales} ယောက်\n`;
     msg += `💰 စုစုပေါင်းရရှိပြီးငွေ: ${rep.totalRevenue} MMK\n\n`;
     msg += `🧑‍💻 ADMIN SALES SUMMARY\n`;
-    msg += ` ┣━ Owner-HCM: ${rep.adminRevenue['Owner-HCM']} MMK\n`;
-    msg += ` ┗━ Admin-CM: ${rep.adminRevenue['Admin-CM']} MMK\n\n`;
+    msg += ` ┣━ Owner-HCM: ${rep.adminRevenue['Owner-HCM'] || 0} MMK\n`;
+    msg += ` ┗━ Admin-CM: ${rep.adminRevenue['Admin-CM'] || 0} MMK\n\n`;
     msg += `📦 SERVICE SUMMARY\n`;
-    msg += ` ┣━ 🌐 VPN Keys: ${rep.serviceCount['VPN Keys']} ခု\n`;
-    msg += ` ┗━ 🖥 VPS (Outline/3X): ${rep.serviceCount['VPS']} လုံး`;
+    msg += ` ┣━ 🌐 VPN Keys: ${rep.serviceCount['VPN Keys'] || 0} ခု\n`;
+    msg += ` ┗━ 🖥 VPS (Outline/3X): ${rep.serviceCount['VPS'] || 0} လုံး`;
     
     return ctx.reply(msg);
   } catch (err) {
