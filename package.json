@@ -1,12 +1,11 @@
 {
-  "name": "vpn-sheets-supabase-bot",
+  "name": "hcm-sales-bot",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "@supabase/supabase-client": "^2.43.4",
     "express": "^4.19.2",
     "google-auth-library": "^9.11.0",
     "google-spreadsheet": "^4.1.1",
