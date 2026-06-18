@@ -5,7 +5,7 @@ const express = require('express');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.get('/', (req, res) => res.send('HCM Sales Ledger Bot is running!'));
+app.get('/', (req, res) => res.send('HCM Sales Ledger Bot is running alive!'));
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 if (!process.env.BOT_TOKEN || !process.env.SPREADSHEET_ID) {
@@ -45,21 +45,23 @@ bot.on('text', async (ctx, next) => {
   const text = ctx.message.text;
   if (text.includes('Report')) return next();
 
-  const userMatch = text.match(/User:\s*([^\n]+)/i);
-  const packageMatch = text.match(/Package\s*:\s*([^\n]+)/i);
-  const priceMatch = text.match(/Price:\s*(\d+)/i);
-  const expMatch = text.match(/Expiry:\s*([^\n]+)/i);
-  const adminMatch = text.match(/ရောင်းချသူ Admin:\s*([^\n]+)/i);
-  const keyMatch = text.match(/Key:\s*\n*\n*([A-Z0-9]+)/i);
-  const linkMatch = text.match(/Link:\s*([^\n]*)/i);
+  // စာသားထဲကနေ အချက်အလက်တွေကို စာလုံးအကြီးအသေးမရွေး ဖတ်နိုင်အောင် ပြင်ဆင်ထားခြင်း
+  const nameMatch = text.match(/(?:NAME|User):\s*([^\n]+)/i);
+  const typeMatch = text.match(/(?:VPN TYPE|Package):\s*([^\n]+)/i);
+  const moneyMatch = text.match(/(?:MONEY|Price):\s*(\d+)/i);
+  const expMatch = text.match(/(?:EXPER-DATE|Expiry):\s*([^\n]+)/i);
+  const keyMatch = text.match(/(?:VPN KEY|Key):\s*\n*\n*([A-Za-z0-9\-_+=/]+)/i);
+  const linkMatch = text.match(/(?:WEB LINK|Link):\s*([^\n]*)/i);
+  const adminMatch = text.match(/(?:ရောင်းချသူ Admin|SELLER):\s*([^\n]+)/i);
 
-  if (!packageMatch || !priceMatch) {
-    return ctx.reply('⚠️ VPN Details Format မဟုတ်ပါဘူးခင်ဗျာ။ ပြန်လည်စစ်ဆေးပေးပါ။');
+  // မဖြစ်မနေ ပါရမယ့် Name, Type နဲ့ Money ကို စစ်ဆေးခြင်း
+  if (!nameMatch || !typeMatch || !moneyMatch) {
+    return ctx.reply('⚠️ VPN Details Format မဟုတ်ပါဘူးခင်ဗျာ။\n\nစာရင်းသွင်းရန် ပုံစံဥပမာ-\n\nNAME: Hein Htet\nVPN TYPE: 1 Month\nMONEY: 5000\nEXPER-DATE: 18/7/2026\nVPN KEY: ABC123XYZ\nWEB LINK: -\nရောင်းချသူ Admin: Owner-HCM');
   }
 
-  const userName = userMatch ? userMatch[1].trim() : 'Unknown';
-  const vpnType = packageMatch[1].trim();
-  const money = parseInt(priceMatch[1]);
+  const userName = nameMatch[1].trim();
+  const vpnType = typeMatch[1].trim();
+  const money = parseInt(moneyMatch[1]);
   const experDate = expMatch ? expMatch[1].trim() : '-';
   const vpnKey = keyMatch ? keyMatch[1].trim() : '-';
   const webLink = linkMatch && linkMatch[1] ? linkMatch[1].trim() : '-';
@@ -75,7 +77,6 @@ bot.on('text', async (ctx, next) => {
     renewStatus = 'RENEW';
   }
 
-  // ရက်စွဲသတ်မှတ်ချက် (မြန်မာစံတော်ချိန်)
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { timeZone: 'Asia/Yangon' }); 
 
@@ -100,7 +101,7 @@ bot.on('text', async (ctx, next) => {
   }
 });
 
-// စိတ်ချရအောင် ပုံသေနည်း ပြန်ပြင်ထားသော Report Generator
+// Sheet ထဲက စာရင်းတွေကို ပြန်ဖတ်ပြီး စာရင်းချုပ်တွက်ပေးသည့် Function
 async function generateReport(filterType) {
   const sheet = doc.sheetsByIndex[0];
   const rows = await sheet.getRows();
