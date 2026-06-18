@@ -1,14 +1,15 @@
 {
-  "name": "vpn-sales-bot",
+  "name": "vpn-sheets-supabase-bot",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
+    "@supabase/supabase-client": "^2.43.4",
     "express": "^4.19.2",
-    "pg": "^8.11.5",
+    "google-auth-library": "^9.11.0",
+    "google-spreadsheet": "^4.1.1",
     "telegraf": "^4.16.3"
   }
 }
